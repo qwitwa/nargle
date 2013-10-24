@@ -17,17 +17,23 @@ else:
 
     
 #---READ IN A LIST OF FILES---
-def filerefresh(filename=None):
+def filerefresh(filename=None, action='add', newname=None):
     global list_of_files, files
     list_of_files = os.listdir(path)
-    def readfile(name):
-        this_path = path + "/" + name
+    def readfile(filename):
+        this_path = path + "/" + filename
         if os.path.isfile(this_path):
             fd = open(this_path)
-            files[name] = fd.read()
+            files[filename] = fd.read()
             fd.close()
     if filename:
-        readfile(filename)
+        if action == 'remove':
+            del files[filename]
+        elif action == 'rename':
+            files[newname] = files[filename]
+            del files[filename]
+        else:
+            readfile(filename)
     else:
         files = {}
         for name in list_of_files:
@@ -42,10 +48,14 @@ commandstring = ''
 # A dict of commands and the corresponding python code they run
 # Code starting with ':' is instead interpreted as meaning an alias
 #      to another command
-commands = {'q': 'raise urwid.ExitMainLoop()', 'quit':':q'}
+commands = {'q': 'raise urwid.ExitMainLoop()',
+            'quit': ':q',
+            'delete': 'deleteorrenamefile()',
+}
 searchstring = ''
 errorstring = 'To see help, type :h' #TODO
 errormode = True
+currentfilename = False
 def handleinput(key):
     global commandstring, commandmode, errormode, searchstring
     #Before processing
@@ -79,6 +89,7 @@ def handlesearchinput(key):
         if searchstring and searchstring[-1] == ' ':
             searchstring = searchstring[:-1]
         searchstring = searchstring[:-1]
+        incsearch()
     elif key == "enter":
         if lb.focus:
             currentfilename = lb.curtext()
@@ -88,7 +99,7 @@ def handlesearchinput(key):
         col.focus_position = 1
     elif len(key) == 1:
         searchstring += key
-    incsearch()
+        incsearch()
 
 def incsearch():
     global viewable_list_of_files
@@ -100,18 +111,23 @@ def incsearch():
 
 def matchingfiles(word):
     returnlist = []
-    for i in list_of_files:
-        if re.search(word, i, re.I):
+    for i in viewable_list_of_files:
+        # word = re.escape(word) 
+        if re.search(word, i, re.I) or re.search(word, files[i], re.I):
             returnlist.append(i)
     return returnlist
 
 
-def createfile(name):
-    this_path = path + "/" + name
+def createfile(filename):
+    global files, viewable_list_of_files
+    this_path = path + "/" + filename
     fd = open(this_path, 'a')
     fd.close()
-    filerefresh(name)
-    
+    filerefresh(filename)
+    files[filename] = ''
+    viewable_list_of_files = [filename]
+    updatelist()
+    setedittolistitem(lb.curtext()) 
     
 
 def handlecommandinput(key):
@@ -141,7 +157,21 @@ def processcommand():
         processcommand()
     else:
         exec(commandcode)
-    
+
+def deleteorrenamefile(newname=None):
+    global currentfilename
+    if not currentfilename:
+        currentfilename = lb.curtext()
+    this_path = path + "/" + currentfilename
+    if newname:
+        new_path = path + "/" + newname
+        os.rename(this_path, new_path)
+        filerefresh(currentfilename, 'rename', newname)
+    else:
+        os.remove(this_path)
+        filerefresh(currentfilename, 'remove')    
+    incsearch()
+
 def updatelist():
     for i in range(len(sflw)):
         del sflw[0]
@@ -174,9 +204,12 @@ class SText(urwid.Text):
 # A listbox that sends a signal after processing keypresses
 class KListBox(urwid.ListBox):
     def keypress(self, size, key):
+        global errormode
         if key in ["up", "down", "page up", "page down"]:
             super().keypress(size, key)
             setedittolistitem(self.curtext())
+            errormode = False
+            updateheader()
             updatefooter()
         else:
             handleinput(key)
@@ -229,16 +262,16 @@ col = urwid.Columns(collist, dividechars=2, min_width=15)
 
 
 #---PUT THE COLUMN IN A FRAME---
-header = urwid.Text(commandstring)
+header = urwid.Text('')
 footer = urwid.Text(('mrbold', "Footer"), align='right')
 frame = urwid.Frame(col, header, footer)
 
 
 #---INITIALISE, DEFINE A MAIN LOOP, AND RUN---
 # initialisation
-palette = [('mrbold', 'bold', '', 'bold'),
-           ('inverse', 'black,bold', 'dark green'),]
-
+palette = [('mrbold', 'black,bold', 'dark green'),
+           ('inverse', 'dark green,bold', 'black'),]
+updateheader()
 setedittolistitem(lb.curtext())
 # define loop and run
 loop = urwid.MainLoop(frame, palette, unhandled_input=handleinput, screen=urwid.raw_display.Screen())
