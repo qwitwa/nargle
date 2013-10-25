@@ -274,6 +274,6 @@ palette = [('mrbold', 'black,bold', 'dark green'),
 updateheader()
 setedittolistitem(lb.curtext())
 # define loop and run
-loop = urwid.MainLoop(frame, palette, unhandled_input=handleinput, screen=urwid.raw_display.Screen())
+loop = urwid.MainLoop(frame, palette, unhandled_input=handleinput, screen=urwid.raw_display.Screen(), handle_mouse=False)
 loop.run()
 
