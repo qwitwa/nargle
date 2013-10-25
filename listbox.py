@@ -50,10 +50,11 @@ commandstring = ''
 #      to another command
 commands = {'q': 'raise urwid.ExitMainLoop()',
             'quit': ':q',
-            'delete': 'deleteorrenamefile()',
+            'delete': ':d',
+            'd': 'deleteorrenamefile()',
 }
 searchstring = ''
-errorstring = 'To see help, type :h' #TODO
+errorstring = ':q to quit, :d to delete a file' 
 errormode = True
 currentfilename = False
 def handleinput(key):
@@ -160,8 +161,7 @@ def processcommand():
 
 def deleteorrenamefile(newname=None):
     global currentfilename
-    if not currentfilename:
-        currentfilename = lb.curtext()
+    currentfilename = lb.curtext()
     this_path = path + "/" + currentfilename
     if newname:
         new_path = path + "/" + newname
