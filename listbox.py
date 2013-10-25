@@ -176,7 +176,7 @@ def updatelist():
     for i in range(len(sflw)):
         del sflw[0]
     for i in sorted(viewable_list_of_files):
-        sflw.append(urwid.AttrMap(SText(i, wrap='clip'), 'inverse', focus_map='mrbold'))
+        sflw.append(urwid.AttrMap(SText(i, wrap='clip'), 'inversegreen', focus_map='boldgreen'))
         
         
 def updateheader():
@@ -263,14 +263,14 @@ col = urwid.Columns(collist, dividechars=2, min_width=15)
 
 #---PUT THE COLUMN IN A FRAME---
 header = urwid.Text('')
-footer = urwid.Text(('mrbold', "Footer"), align='right')
+footer = urwid.Text('', align='right')
 frame = urwid.Frame(col, header, footer)
 
 
 #---INITIALISE, DEFINE A MAIN LOOP, AND RUN---
 # initialisation
-palette = [('mrbold', 'black,bold', 'dark green'),
-           ('inverse', 'dark green,bold', 'black'),]
+palette = [('boldgreen', 'black,bold', 'dark green'),
+           ('inversegreen', 'dark green,bold', 'black'),]
 updateheader()
 setedittolistitem(lb.curtext())
 # define loop and run
