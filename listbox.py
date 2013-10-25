@@ -50,7 +50,7 @@ commandstring = ''
 #      to another command
 commands = {'q': 'raise urwid.ExitMainLoop()',
             'quit': ':q',
-            'delete': ':d'
+            'delete': ':d',
             'd': 'deleteorrenamefile()',
 }
 searchstring = ''
