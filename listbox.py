@@ -20,8 +20,9 @@ else:
 def filerefresh(filename=None, action='add', newname=None):
     global list_of_files, files
     list_of_files = os.listdir(path)
+    list_of_files = [os.path.splitext(i)[0] for i in list_of_files if os.path.splitext(i)[1] == ".txt"]
     def readfile(filename):
-        this_path = path + "/" + filename
+        this_path = path + '/' + filename + '.txt'
         if os.path.isfile(this_path):
             fd = open(this_path)
             files[filename] = fd.read()
@@ -121,7 +122,7 @@ def matchingfiles(word):
 
 def createfile(filename):
     global files, viewable_list_of_files
-    this_path = path + "/" + filename
+    this_path = path + "/" + filename + ".txt"
     fd = open(this_path, 'a')
     fd.close()
     filerefresh(filename)
@@ -162,9 +163,9 @@ def processcommand():
 def deleteorrenamefile(newname=None):
     global currentfilename
     currentfilename = lb.curtext()
-    this_path = path + "/" + currentfilename
+    this_path = path + "/" + currentfilename + '.txt'
     if newname:
-        new_path = path + "/" + newname
+        new_path = path + "/" + newname + '.txt'
         os.rename(this_path, new_path)
         filerefresh(currentfilename, 'rename', newname)
     else:
@@ -239,7 +240,7 @@ class BEdit(urwid.Edit):
             super().keypress(size, key)
 
 def savecurrentfile():
-    this_path = path + "/" + currentfilename
+    this_path = path + '/' + currentfilename + '.txt'
     if os.path.isfile(this_path):
         fd = open(this_path, 'w')
         editedtext = editable.get_edit_text()
