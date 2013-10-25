@@ -161,8 +161,7 @@ def processcommand():
 
 def deleteorrenamefile(newname=None):
     global currentfilename
-    if not currentfilename:
-        currentfilename = lb.curtext()
+    currentfilename = lb.curtext()
     this_path = path + "/" + currentfilename
     if newname:
         new_path = path + "/" + newname
