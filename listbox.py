@@ -50,10 +50,11 @@ commandstring = ''
 #      to another command
 commands = {'q': 'raise urwid.ExitMainLoop()',
             'quit': ':q',
-            'delete': 'deleteorrenamefile()',
+            'delete': ':d'
+            'd': 'deleteorrenamefile()',
 }
 searchstring = ''
-errorstring = 'To see help, type :h' #TODO
+errorstring = ':q to quit, :d to delete a file' 
 errormode = True
 currentfilename = False
 def handleinput(key):
