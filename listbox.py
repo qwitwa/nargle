@@ -20,8 +20,9 @@ else:
 def filerefresh(filename=None, action='add', newname=None):
     global list_of_files, files
     list_of_files = os.listdir(path)
+    list_of_files = [os.path.splitext(i)[0] for i in list_of_files if os.path.splitext(i)[1] == ".txt"]
     def readfile(filename):
-        this_path = path + "/" + filename
+        this_path = path + '/' + filename + '.txt'
         if os.path.isfile(this_path):
             fd = open(this_path)
             files[filename] = fd.read()
@@ -50,10 +51,11 @@ commandstring = ''
 #      to another command
 commands = {'q': 'raise urwid.ExitMainLoop()',
             'quit': ':q',
-            'delete': 'deleteorrenamefile()',
+            'delete': ':d',
+            'd': 'deleteorrenamefile()',
 }
 searchstring = ''
-errorstring = 'To see help, type :h' #TODO
+errorstring = ':q to quit, :d to delete a file' 
 errormode = True
 currentfilename = False
 def handleinput(key):
@@ -111,16 +113,16 @@ def incsearch():
 
 def matchingfiles(word):
     returnlist = []
+    newword = re.escape(word) 
     for i in viewable_list_of_files:
-        # word = re.escape(word) 
-        if re.search(word, i, re.I) or re.search(word, files[i], re.I):
+        if re.search(newword, i, re.I) or re.search(newword, files[i], re.I):
             returnlist.append(i)
     return returnlist
 
 
 def createfile(filename):
     global files, viewable_list_of_files
-    this_path = path + "/" + filename
+    this_path = path + "/" + filename + ".txt"
     fd = open(this_path, 'a')
     fd.close()
     filerefresh(filename)
@@ -160,11 +162,10 @@ def processcommand():
 
 def deleteorrenamefile(newname=None):
     global currentfilename
-    if not currentfilename:
-        currentfilename = lb.curtext()
-    this_path = path + "/" + currentfilename
+    currentfilename = lb.curtext()
+    this_path = path + "/" + currentfilename + '.txt'
     if newname:
-        new_path = path + "/" + newname
+        new_path = path + "/" + newname + '.txt'
         os.rename(this_path, new_path)
         filerefresh(currentfilename, 'rename', newname)
     else:
@@ -176,7 +177,7 @@ def updatelist():
     for i in range(len(sflw)):
         del sflw[0]
     for i in sorted(viewable_list_of_files):
-        sflw.append(urwid.AttrMap(SText(i, wrap='clip'), 'inverse', focus_map='mrbold'))
+        sflw.append(urwid.AttrMap(SText(i, wrap='clip'), 'inversegreen', focus_map='boldgreen'))
         
         
 def updateheader():
@@ -239,7 +240,7 @@ class BEdit(urwid.Edit):
             super().keypress(size, key)
 
 def savecurrentfile():
-    this_path = path + "/" + currentfilename
+    this_path = path + '/' + currentfilename + '.txt'
     if os.path.isfile(this_path):
         fd = open(this_path, 'w')
         editedtext = editable.get_edit_text()
@@ -263,17 +264,17 @@ col = urwid.Columns(collist, dividechars=2, min_width=15)
 
 #---PUT THE COLUMN IN A FRAME---
 header = urwid.Text('')
-footer = urwid.Text(('mrbold', "Footer"), align='right')
+footer = urwid.Text('', align='right')
 frame = urwid.Frame(col, header, footer)
 
 
 #---INITIALISE, DEFINE A MAIN LOOP, AND RUN---
 # initialisation
-palette = [('mrbold', 'black,bold', 'dark green'),
-           ('inverse', 'dark green,bold', 'black'),]
+palette = [('boldgreen', 'black,bold', 'dark green'),
+           ('inversegreen', 'dark green,bold', 'black'),]
 updateheader()
 setedittolistitem(lb.curtext())
 # define loop and run
-loop = urwid.MainLoop(frame, palette, unhandled_input=handleinput, screen=urwid.raw_display.Screen())
+loop = urwid.MainLoop(frame, palette, unhandled_input=handleinput, screen=urwid.raw_display.Screen(), handle_mouse=False)
 loop.run()
 
