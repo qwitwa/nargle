@@ -111,9 +111,9 @@ def incsearch():
 
 def matchingfiles(word):
     returnlist = []
+    newword = re.escape(word) 
     for i in viewable_list_of_files:
-        # word = re.escape(word) 
-        if re.search(word, i, re.I) or re.search(word, files[i], re.I):
+        if re.search(newword, i, re.I) or re.search(newword, files[i], re.I):
             returnlist.append(i)
     return returnlist
 
