@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import urwid
 import time
 import os
