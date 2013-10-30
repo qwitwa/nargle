@@ -94,12 +94,12 @@ def handlesearchinput(key):
         searchstring = searchstring[:-1]
         incsearch()
     elif key == "enter":
-        if lb.focus:
-            currentfilename = lb.curtext()
-        else:
-            currentfilename = searchstring
-            createfile(searchstring)
+        currentfilename = searchstring
+        createfile(searchstring)
         col.focus_position = 1
+    elif key == "right":
+            currentfilename = lb.curtext()
+            col.focus_position = 1
     elif len(key) == 1:
         searchstring += key
         incsearch()
